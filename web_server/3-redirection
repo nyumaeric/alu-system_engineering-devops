@@ -1,37 +1,15 @@
 #!/usr/bin/env bash
-# installing and config nginx
+# redirecting to another page on nginx
 
-apt-get update
-apt-get -y install nginx
+sudo apt-get update
+sudo apt-get install -y nginx
 
-# adding a html page
-echo "Holberton School" > /var/www/html/index.html
+echo "Holberton School" | sudo tee /var/www/html/index.html
 
-CONFIG=\
-"server {
-	listen 80 default_server;
-  	listen [::]:80 default_server;
+# redirection config
+replacement="server_name _;\\
+    rewrite ^/redirect_me https://www.github.com/nyumaeric/ permanent;"
+sudo sed -i "s|server_name _;|$replacement|" /etc/nginx/sites-available/default
 
-        root /var/www/html;
-
-        index index.html index.htm index.nginx-debian.html;
-	server_name _;
-	rewrite ^/redirect_me(.*)$ http://www.google.com/ permanent;
-        location / {
-                try_files \$uri \$uri/ =404;
-	}
-}"
-
-echo -e "$CONFIG" > /etc/nginx/sites-enabled/default
-
-# checking if service is running
-state=$(pgrep nginx)
-if [ -n "$state" ];
-then
-	sudo service nginx restart
-	echo "resarting Nginx...."
-else
-	sudo service nginx start
-	echo "Ngix started.."
-fi
-echo "done"
+sudo nginx -t
+sudo service nginx start
