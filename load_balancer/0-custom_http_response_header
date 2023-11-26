@@ -1,27 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Configure Nginx so that its HTTP response contains a custom header
+# The name of the custom HTTP header must be `X-Served-By`
+# The value of the custom HTTP header must be the `hostname` of the server Nginx is running on
 
-# Update the package list and install Nginx
-sudo apt update && sudo apt install nginx -y
+sudo apt-get update
+sudo apt-get -y install nginx
+sudo ufw enable
+sudo ufw allow 'Nginx HTTP'
+echo 'Hello World!' |sudo tee /var/www/html/index.html
 
-# Get the hostname of the server
-server_hostname=$(hostname)
-
-# Configure Nginx to add the custom HTTP header
-cat > /etc/nginx/nginx.conf << EOF
-http {
-    server {
-        listen 80;
-        server_name $server_hostname;
-
-        add_header X-Served-By $server_hostname;
-
-        location / {
-            root /var/www/html;
-            index index.html;
-        }
-    }
-}
-EOF
-
-# Restart Nginx to apply the new configuration
-sudo systemctl restart nginx
+custom_header="server_name _;\n\tadd_header X-Served-By \$HOSTNAME;"
+sudo sed -i "s|server_name _;|$custom_header|" /etc/nginx/sites-enabled/default
+sudo service nginx restart
