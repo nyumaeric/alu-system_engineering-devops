@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#To view the current IPTables rules
+sudo iptables -L -n
+
+#Redirect Port 8080 to Port 80
+sudo iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80
+
+#To save the IPTables rules
+sudo apt-get update
+sudo apt-get install iptables-persistent
+sudo netfilter-persistent save
+sudo netfilter-persistent reload
